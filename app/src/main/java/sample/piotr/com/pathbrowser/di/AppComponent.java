@@ -5,8 +5,9 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import dagger.android.support.AndroidSupportInjectionModule;
+import sample.piotr.com.pathbrowser.service.LocationService;
 import sample.piotr.com.pathbrowser.MyApplication;
-import sample.piotr.com.pathbrowser.api.api.ApiManager;
+import sample.piotr.com.pathbrowser.api.ApiManager;
 
 @Singleton
 @Component(
@@ -21,4 +22,6 @@ public interface AppComponent {
     ApiManager apiManager();
 
     void inject(MyApplication myapplication);
+    void inject(LocationService service);
+
 }

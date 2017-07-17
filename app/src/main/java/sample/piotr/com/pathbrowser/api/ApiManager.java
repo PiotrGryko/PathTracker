@@ -1,4 +1,4 @@
-package sample.piotr.com.pathbrowser.api.api;
+package sample.piotr.com.pathbrowser.api;
 
 import android.content.Context;
 

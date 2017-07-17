@@ -4,6 +4,9 @@ import android.app.Application;
 import android.arch.persistence.room.Room;
 import android.os.Handler;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
@@ -15,7 +18,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import sample.piotr.com.pathbrowser.api.api.ApiManager;
+import sample.piotr.com.pathbrowser.api.ApiManager;
 import sample.piotr.com.pathbrowser.dao.MyRoomDatabase;
 import sample.piotr.com.pathbrowser.dao.PathRepository;
 
@@ -65,5 +68,21 @@ public class AppModule {
     public PathRepository getPathRepository(Handler handler, MyRoomDatabase myRoomDatabase, ApiManager apiManager, Executor executor) {
 
         return new PathRepository(handler, myRoomDatabase, apiManager, executor);
+    }
+
+    @Provides
+    @Singleton
+    public FusedLocationProviderClient provideFusedLocationProviderClient() {
+
+        return LocationServices.getFusedLocationProviderClient(mApplication);
+    }
+
+    @Singleton
+    @Provides
+    public LocationRequest provideLocationRequest() {
+
+        LocationRequest request = new LocationRequest();
+        request.setInterval(30000);
+        return request;
     }
 }

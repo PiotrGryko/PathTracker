@@ -5,7 +5,7 @@ import android.os.Handler;
 
 import java.util.concurrent.Executor;
 
-import sample.piotr.com.pathbrowser.api.api.ApiManager;
+import sample.piotr.com.pathbrowser.api.ApiManager;
 
 public class PathRepository {
 

@@ -1,18 +1,50 @@
 package sample.piotr.com.pathbrowser;
 
+import android.Manifest;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.Fade;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 
 import dagger.android.AndroidInjection;
 import sample.piotr.com.pathbrowser.list.FragmentList;
 import sample.piotr.com.pathbrowser.map.FragmentMap;
+import sample.piotr.com.pathbrowser.service.LocationService;
 import sample.piotr.com.pathbrowser.util.DetailsTransition;
 
 public class MainActivity extends AppCompatActivity {
+
+    private LocationService mService;
+    private boolean mBound = false;
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +61,40 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction().add(R.id.fragments_container, new FragmentMap()).commitAllowingStateLoss();
             }
         }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+    }
+
+    @Override
+    protected void onStart() {
+
+        super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, LocationService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+        }
     }
 
     public void replaceFragmentWithTransition(Fragment fragment, View view, String transitionName) {
 
         Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragments_container);
+
+        if (current.getClass() == fragment.getClass()) { return; }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             fragment.setSharedElementEnterTransition(new DetailsTransition());
             fragment.setEnterTransition(new Fade());
@@ -42,11 +103,15 @@ public class MainActivity extends AppCompatActivity {
             fragment.setAllowReturnTransitionOverlap(true);
             fragment.setSharedElementReturnTransition(new DetailsTransition());
         }
-        getSupportFragmentManager().beginTransaction().addSharedElement(view, transitionName).replace(R.id.fragments_container, fragment).addToBackStack(null)
-                .commitAllowingStateLoss();
+        getSupportFragmentManager().beginTransaction().addSharedElement(view, transitionName).replace(R.id.fragments_container, fragment)
+                .addToBackStack(null).commitAllowingStateLoss();
     }
 
     public void replaceFragment(Fragment fragment, boolean backstack) {
+
+        if (getSupportFragmentManager().findFragmentById(R.id.fragments_container).getClass() == fragment.getClass()) {
+            return;
+        }
 
         if (backstack) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragments_container, fragment).addToBackStack(null).commitAllowingStateLoss();
@@ -58,5 +123,29 @@ public class MainActivity extends AppCompatActivity {
     public boolean isTablet() {
 
         return getResources().getBoolean(R.bool.isTablet);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.map:
+                replaceFragment(new FragmentMap(), true);
+                return true;
+            case R.id.toggle:
+                if (mService != null) { mService.toggleTracking(this); }
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

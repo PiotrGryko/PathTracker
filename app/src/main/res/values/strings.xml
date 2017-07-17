@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">PathBrowser</string>
+    <string name="fragment_map">Map</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
