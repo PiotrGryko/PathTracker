@@ -74,7 +74,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
 
-        viewHolder.textview_1_1.setText(Integer.toString(data.get(position).getId()));
+        viewHolder.textview_1_1.setText(Long.toString(data.get(position).getId()));
         ViewCompat.setTransitionName(viewHolder.textview_1_1, String.valueOf(position) + "_test2");
     }
 

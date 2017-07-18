@@ -1,6 +1,5 @@
 package sample.piotr.com.pathbrowser.service;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -15,10 +14,17 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import sample.piotr.com.pathbrowser.MyApplication;
 import sample.piotr.com.pathbrowser.R;
+import sample.piotr.com.pathbrowser.dao.PathRepository;
+import sample.piotr.com.pathbrowser.model.ModelPath;
+import sample.piotr.com.pathbrowser.model.ModelPoint;
 
 public class LocationService extends Service implements LocationPresenterContract.View {
 
@@ -26,7 +32,11 @@ public class LocationService extends Service implements LocationPresenterContrac
     private LocationCallback mLocationCallback;
     private final IBinder mBinder = new LocalBinder();
     private boolean isTracking;
+    private ModelPath currentPath;
+    private LocationServicePresenter presenter;
 
+    @Inject
+    PathRepository pathRepository;
     @Inject
     FusedLocationProviderClient fusedLocationProviderClient;
     @Inject
@@ -57,18 +67,6 @@ public class LocationService extends Service implements LocationPresenterContrac
         return true;
     }
 
-    public void toggleTracking(Context context) {
-
-        Intent intent = new Intent(context, LocationService.class);
-        if (!isTracking) {
-            startService(intent);
-            startJourney();
-        } else {
-            stopJourney();
-            stopService(intent);
-        }
-    }
-
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.d("XXX", "onstart command " + intent);
@@ -82,6 +80,7 @@ public class LocationService extends Service implements LocationPresenterContrac
         Log.d("XXX", "on create " + isTracking + " " + mLocationCallback);
         ((MyApplication) getApplicationContext()).getAppComponent().inject(this);
 
+        presenter = new LocationServicePresenter(pathRepository, this);
         mLocationCallback = new LocationCallback() {
 
             @Override
@@ -89,29 +88,10 @@ public class LocationService extends Service implements LocationPresenterContrac
 
                 Log.d("XXX", "location fetched");
                 for (Location location : locationResult.getLocations()) {
-                    // Update UI with location data
-                    // ...
+                    if (currentPath != null) { presenter.onLocationFetched(currentPath, location); }
                 }
             }
         };
-    }
-
-    public void startJourney() {
-
-        isTracking = true;
-
-        fusedLocationProviderClient.requestLocationUpdates(request, mLocationCallback, null);
-        showNotification();
-        Log.d("XXX", "start journey");
-    }
-
-    public void stopJourney() {
-
-        fusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-        //notificationManager.cancel(NOTIFICTATION_ID);
-        stopForeground(true);
-        isTracking = false;
-        Log.d("XXX", "stop journey");
     }
 
     public void showNotification() {
@@ -126,5 +106,48 @@ public class LocationService extends Service implements LocationPresenterContrac
 
         super.onDestroy();
         Log.d("XXX", "on destroy");
+    }
+
+    @Override
+    public void onPathReady(ModelPath path) {
+
+        Log.d("XXX", "on path ready");
+        if (isTracking) { currentPath = path; }
+    }
+
+    @Override
+    public void onPathsFetched(List<ModelPath> paths) {
+
+    }
+
+    public void toggleTracking(Context context) {
+
+        Intent intent = new Intent(context, LocationService.class);
+        if (!isTracking) {
+            startService(intent);
+            startJourney();
+        } else {
+            stopJourney();
+            stopService(intent);
+        }
+    }
+
+    public void startJourney() {
+
+        isTracking = true;
+        currentPath = new ModelPath(Calendar.getInstance().getTime(),Calendar.getInstance().getTime(),new ArrayList<ModelPoint>());
+        fusedLocationProviderClient.requestLocationUpdates(request, mLocationCallback, null);
+        showNotification();
+        Log.d("XXX", "start journey");
+    }
+
+    public void stopJourney() {
+
+        fusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
+        //notificationManager.cancel(NOTIFICTATION_ID);
+        stopForeground(true);
+        isTracking = false;
+        currentPath = null;
+        Log.d("XXX", "stop journey");
     }
 }

@@ -2,6 +2,8 @@ package sample.piotr.com.pathbrowser.service;
 
 import android.location.Location;
 
+import java.util.List;
+
 import sample.piotr.com.pathbrowser.model.ModelPath;
 
 /**
@@ -12,8 +14,10 @@ public interface LocationPresenterContract {
 
     interface Presenter{
         public void onLocationFetched(ModelPath path,Location point);
+        public void fetchPaths();
     }
     interface View{
-        //In case of our service we dont update the UI. Probably redundant
+        public void onPathReady(ModelPath path);
+        public void onPathsFetched(List<ModelPath> paths);
     }
 }
