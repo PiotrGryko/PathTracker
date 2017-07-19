@@ -6,6 +6,7 @@ import java.util.List;
 
 import sample.piotr.com.pathbrowser.dao.PathRepository;
 import sample.piotr.com.pathbrowser.model.ModelPath;
+import sample.piotr.com.pathbrowser.model.ModelPoint;
 
 /**
  * Created by piotr on 17/07/17.
@@ -16,7 +17,6 @@ public class LocationServicePresenter implements LocationPresenterContract.Prese
     private PathRepository pathRepository;
     private LocationPresenterContract.View view;
 
-
     public LocationServicePresenter(PathRepository pathRepository, LocationPresenterContract.View view) {
 
         this.pathRepository = pathRepository;
@@ -26,6 +26,7 @@ public class LocationServicePresenter implements LocationPresenterContract.Prese
     @Override
     public void onLocationFetched(ModelPath path, Location point) {
 
+        path.getPoints().add(new ModelPoint(point.getLatitude(), point.getLongitude()));
         pathRepository.savePath(path, new PathRepository.OnPathCallback<ModelPath>() {
 
             @Override

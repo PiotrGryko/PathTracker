@@ -6,9 +6,7 @@ import android.util.Log;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-import sample.piotr.com.pathbrowser.api.ApiManager;
 import sample.piotr.com.pathbrowser.model.ModelPath;
-import sample.piotr.com.pathbrowser.model.ModelPoint;
 
 public class PathRepository {
 
@@ -20,15 +18,13 @@ public class PathRepository {
     }
 
     private MyRoomDatabase myRoomDatabase;
-    private ApiManager apiManager;
     private Handler handler;
     private Executor executor;
 
-    public PathRepository(Handler handler, MyRoomDatabase myRoomDatabase, ApiManager apiManager, Executor executor) {
+    public PathRepository(Handler handler, MyRoomDatabase myRoomDatabase, Executor executor) {
 
         this.handler = handler;
         this.myRoomDatabase = myRoomDatabase;
-        this.apiManager = apiManager;
         this.executor = executor;
     }
 
@@ -53,9 +49,10 @@ public class PathRepository {
 
                 if (path.getId() == 0) {
                     long id = myRoomDatabase.pathDao().insertPath(path);
-                    Log.d("XXX","id "+id);
+                    Log.d("XXX", "id " + id);
                     path.setId(id);
-                } else {
+                }
+                else {
                     myRoomDatabase.pathDao().updatePath(path);
                 }
                 publishResult(path, callback);
@@ -71,6 +68,8 @@ public class PathRepository {
             public void run() {
 
                 List<ModelPath> paths = myRoomDatabase.pathDao().loadAllPaths();
+                Log.d("XXX", "all paths " + paths.size());
+
                 publishResult(paths, callback);
             }
         });

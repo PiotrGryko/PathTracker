@@ -28,12 +28,18 @@ import sample.piotr.com.pathbrowser.model.ModelPoint;
 
 public class LocationService extends Service implements LocationPresenterContract.View {
 
+    public interface OnPathListener {
+
+        public void onPathUpdated(ModelPath path);
+    }
+
     private final static int NOTIFICTATION_ID = 001;
     private LocationCallback mLocationCallback;
     private final IBinder mBinder = new LocalBinder();
     private boolean isTracking;
     private ModelPath currentPath;
     private LocationServicePresenter presenter;
+    private OnPathListener onPathListener;
 
     @Inject
     PathRepository pathRepository;
@@ -41,6 +47,15 @@ public class LocationService extends Service implements LocationPresenterContrac
     FusedLocationProviderClient fusedLocationProviderClient;
     @Inject
     LocationRequest request;
+
+    private final static Calendar calendar;
+    static {
+        calendar = Calendar.getInstance();
+    }
+    public void setOnPathListener(OnPathListener onPathListener) {
+
+        this.onPathListener = onPathListener;
+    }
 
     public class LocalBinder extends Binder {
 
@@ -88,7 +103,9 @@ public class LocationService extends Service implements LocationPresenterContrac
 
                 Log.d("XXX", "location fetched");
                 for (Location location : locationResult.getLocations()) {
-                    if (currentPath != null) { presenter.onLocationFetched(currentPath, location); }
+                    if (currentPath != null) {
+                        presenter.onLocationFetched(currentPath, location);
+                    }
                 }
             }
         };
@@ -112,7 +129,12 @@ public class LocationService extends Service implements LocationPresenterContrac
     public void onPathReady(ModelPath path) {
 
         Log.d("XXX", "on path ready");
-        if (isTracking) { currentPath = path; }
+        if (isTracking) {
+            currentPath = path;
+            if (onPathListener != null) {
+                onPathListener.onPathUpdated(currentPath);
+            }
+        }
     }
 
     @Override
@@ -126,16 +148,22 @@ public class LocationService extends Service implements LocationPresenterContrac
         if (!isTracking) {
             startService(intent);
             startJourney();
-        } else {
+        }
+        else {
             stopJourney();
             stopService(intent);
         }
     }
 
+    public ModelPath getCurrentPath()
+    {
+        return currentPath;
+    }
+
     public void startJourney() {
 
         isTracking = true;
-        currentPath = new ModelPath(Calendar.getInstance().getTime(),Calendar.getInstance().getTime(),new ArrayList<ModelPoint>());
+        currentPath = new ModelPath(calendar.getTime(), calendar.getTime(), new ArrayList<ModelPoint>());
         fusedLocationProviderClient.requestLocationUpdates(request, mLocationCallback, null);
         showNotification();
         Log.d("XXX", "start journey");
@@ -144,7 +172,6 @@ public class LocationService extends Service implements LocationPresenterContrac
     public void stopJourney() {
 
         fusedLocationProviderClient.removeLocationUpdates(mLocationCallback);
-        //notificationManager.cancel(NOTIFICTATION_ID);
         stopForeground(true);
         isTracking = false;
         currentPath = null;

@@ -10,7 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import sample.piotr.com.pathbrowser.R;
 import sample.piotr.com.pathbrowser.model.ModelPath;
@@ -21,6 +23,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private int resource;
     private ArrayList<ModelPath> data;
     private OnItemClickListener onItemClickListener;
+
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
     public RecyclerViewAdapter(Context context, ArrayList<ModelPath> data, int resource) {
 
@@ -36,13 +40,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public class AdapterViewHolder extends RecyclerView.ViewHolder {
 
-        private TextView textview_1_1;
-        private ImageView imageview_1_0;
+        private TextView tvStartTime;
+        private TextView tvEndTime;
+        private TextView tvPointsCount;
 
         public AdapterViewHolder(View itemView) {
 
             super(itemView);
-            textview_1_1 = (TextView) itemView.findViewById(R.id.textview_1_1);
+            tvStartTime = (TextView) itemView.findViewById(R.id.tv_start);
+            tvEndTime = (TextView) itemView.findViewById(R.id.tv_end);
+            tvPointsCount = (TextView) itemView.findViewById(R.id.tv_paths_number);
         }
     }
 
@@ -68,14 +75,17 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             public void onClick(View v) {
 
                 if (onItemClickListener != null) {
-                    onItemClickListener.onItemClick(position, data.get(position), new Pair<View, String>(viewHolder.imageview_1_0, "test"), new Pair<View, String>
-                            (viewHolder.textview_1_1, "test2"));
+                    onItemClickListener.onItemClick(position, data.get(position), new Pair<View, String>(viewHolder.tvStartTime, "test"), new
+                            Pair<View, String>(viewHolder.tvStartTime, "test2"));
                 }
             }
         });
 
-        viewHolder.textview_1_1.setText(Long.toString(data.get(position).getId()));
-        ViewCompat.setTransitionName(viewHolder.textview_1_1, String.valueOf(position) + "_test2");
+        viewHolder.tvStartTime.setText(sdf.format(data.get(position).getStartDate()));
+        viewHolder.tvEndTime.setText(sdf.format(data.get(position).getEndDate()));
+        viewHolder.tvPointsCount.setText("points: " + data.get(position).getPoints().size());
+
+        ViewCompat.setTransitionName(viewHolder.tvStartTime, String.valueOf(position) + "_test2");
     }
 
     @Override

@@ -18,7 +18,6 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import sample.piotr.com.pathbrowser.api.ApiManager;
 import sample.piotr.com.pathbrowser.dao.MyRoomDatabase;
 import sample.piotr.com.pathbrowser.dao.PathRepository;
 
@@ -32,12 +31,7 @@ public class AppModule {
         this.mApplication = mApplication;
     }
 
-    @Provides
-    @Singleton
-    public ApiManager getApiManager() {
 
-        return ApiManager.getInstance(mApplication);
-    }
 
     @Provides
     public Handler provideHandler() {
@@ -65,9 +59,9 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public PathRepository getPathRepository(Handler handler, MyRoomDatabase myRoomDatabase, ApiManager apiManager, Executor executor) {
+    public PathRepository getPathRepository(Handler handler, MyRoomDatabase myRoomDatabase,  Executor executor) {
 
-        return new PathRepository(handler, myRoomDatabase, apiManager, executor);
+        return new PathRepository(handler, myRoomDatabase, executor);
     }
 
     @Provides

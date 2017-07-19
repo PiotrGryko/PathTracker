@@ -13,19 +13,29 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.transition.Fade;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import javax.inject.Inject;
+
 import dagger.android.AndroidInjection;
+import dagger.android.AndroidInjector;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasFragmentInjector;
+import dagger.android.support.HasSupportFragmentInjector;
 import sample.piotr.com.pathbrowser.list.FragmentList;
 import sample.piotr.com.pathbrowser.map.FragmentMap;
+import sample.piotr.com.pathbrowser.model.ModelPath;
 import sample.piotr.com.pathbrowser.service.LocationService;
 import sample.piotr.com.pathbrowser.util.DetailsTransition;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector, LocationService.OnPathListener {
 
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
     private LocationService mService;
     private boolean mBound = false;
 
@@ -36,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
             mService = binder.getService();
+            mService.setOnPathListener(MainActivity.this);
             mBound = true;
         }
 
@@ -56,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             if (!isTablet()) {
                 getSupportFragmentManager().beginTransaction().add(R.id.fragments_container, new FragmentList()).commitAllowingStateLoss();
-            } else {
+            }
+            else {
                 getSupportFragmentManager().beginTransaction().add(R.id.list_container, new FragmentList()).commitAllowingStateLoss();
                 getSupportFragmentManager().beginTransaction().add(R.id.fragments_container, new FragmentMap()).commitAllowingStateLoss();
             }
@@ -67,23 +79,18 @@ public class MainActivity extends AppCompatActivity {
 
             return;
         }
-    }
 
-    @Override
-    protected void onStart() {
-
-        super.onStart();
-        // Bind to LocalService
         Intent intent = new Intent(this, LocationService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
-    protected void onStop() {
+    public void onDestroy() {
 
-        super.onStop();
+        super.onDestroy();
         // Unbind from the service
         if (mBound) {
+            mService.setOnPathListener(null);
             unbindService(mConnection);
             mBound = false;
         }
@@ -93,7 +100,9 @@ public class MainActivity extends AppCompatActivity {
 
         Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragments_container);
 
-        if (current.getClass() == fragment.getClass()) { return; }
+        if (current.getClass() == fragment.getClass()) {
+            return;
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             fragment.setSharedElementEnterTransition(new DetailsTransition());
@@ -115,7 +124,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (backstack) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragments_container, fragment).addToBackStack(null).commitAllowingStateLoss();
-        } else {
+        }
+        else {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragments_container, fragment).commitAllowingStateLoss();
         }
     }
@@ -141,11 +151,42 @@ public class MainActivity extends AppCompatActivity {
                 replaceFragment(new FragmentMap(), true);
                 return true;
             case R.id.toggle:
-                if (mService != null) { mService.toggleTracking(this); }
+                if (mService != null) {
+                    mService.toggleTracking(this);
+                }
                 return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public AndroidInjector<Fragment> supportFragmentInjector() {
+
+        return dispatchingAndroidInjector;
+    }
+
+    public ModelPath getCurrentPath() {
+
+        if (mService != null) {
+            return mService.getCurrentPath();
+        }
+        else {
+            return null;
+        }
+    }
+
+    @Override
+    public void onPathUpdated(ModelPath path) {
+
+        if (path == null) {
+            return;
+        }
+        Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragments_container);
+        if (current instanceof LocationService.OnPathListener) {
+            ((LocationService.OnPathListener) current).onPathUpdated(path);
+        }
+        Log.d("XXX", "main activity on path updated");
     }
 }
