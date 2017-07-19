@@ -1,7 +1,6 @@
 package sample.piotr.com.pathbrowser.dao;
 
 import android.os.Handler;
-import android.util.Log;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -12,9 +11,7 @@ public class PathRepository {
 
     public interface OnPathCallback<T> {
 
-        public void onSuccess(T result);
-
-        public void onFailure();
+        public void onResult(T result);
     }
 
     private MyRoomDatabase myRoomDatabase;
@@ -34,8 +31,7 @@ public class PathRepository {
 
             @Override
             public void run() {
-
-                callback.onSuccess(result);
+                callback.onResult(result);
             }
         });
     }
@@ -49,7 +45,6 @@ public class PathRepository {
 
                 if (path.getId() == 0) {
                     long id = myRoomDatabase.pathDao().insertPath(path);
-                    Log.d("XXX", "id " + id);
                     path.setId(id);
                 }
                 else {
@@ -68,8 +63,6 @@ public class PathRepository {
             public void run() {
 
                 List<ModelPath> paths = myRoomDatabase.pathDao().loadAllPaths();
-                Log.d("XXX", "all paths " + paths.size());
-
                 publishResult(paths, callback);
             }
         });

@@ -30,14 +30,9 @@ public class LocationServicePresenter implements LocationPresenterContract.Prese
         pathRepository.savePath(path, new PathRepository.OnPathCallback<ModelPath>() {
 
             @Override
-            public void onSuccess(ModelPath result) {
+            public void onResult(ModelPath result) {
 
                 view.onPathReady(result);
-            }
-
-            @Override
-            public void onFailure() {
-
             }
         });
     }
@@ -48,14 +43,9 @@ public class LocationServicePresenter implements LocationPresenterContract.Prese
         pathRepository.getAllPaths(new PathRepository.OnPathCallback<List<ModelPath>>() {
 
             @Override
-            public void onSuccess(List<ModelPath> result) {
+            public void onResult(List<ModelPath> result) {
 
                 view.onPathsFetched(result);
-            }
-
-            @Override
-            public void onFailure() {
-
             }
         });
     }

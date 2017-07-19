@@ -7,7 +7,6 @@ import android.location.Location;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -30,7 +29,7 @@ public class LocationService extends Service implements LocationPresenterContrac
 
     public interface OnPathListener {
 
-        public void onPathUpdated(ModelPath path);
+        public void onCurrentPathUpdated(ModelPath path);
     }
 
     private final static int NOTIFICTATION_ID = 001;
@@ -73,18 +72,15 @@ public class LocationService extends Service implements LocationPresenterContrac
 
     public void onRebind(Intent intent) {
 
-        Log.d("XXX", "on rebind");
     }
 
     public boolean onUnbind(Intent intent) {
 
-        Log.d("XXX", "onunbind");
         return true;
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        Log.d("XXX", "onstart command " + intent);
         return Service.START_STICKY;
     }
 
@@ -92,7 +88,6 @@ public class LocationService extends Service implements LocationPresenterContrac
     public void onCreate() {
 
         super.onCreate();
-        Log.d("XXX", "on create " + isTracking + " " + mLocationCallback);
         ((MyApplication) getApplicationContext()).getAppComponent().inject(this);
 
         presenter = new LocationServicePresenter(pathRepository, this);
@@ -101,7 +96,6 @@ public class LocationService extends Service implements LocationPresenterContrac
             @Override
             public void onLocationResult(LocationResult locationResult) {
 
-                Log.d("XXX", "location fetched");
                 for (Location location : locationResult.getLocations()) {
                     if (currentPath != null) {
                         presenter.onLocationFetched(currentPath, location);
@@ -122,17 +116,15 @@ public class LocationService extends Service implements LocationPresenterContrac
     public void onDestroy() {
 
         super.onDestroy();
-        Log.d("XXX", "on destroy");
     }
 
     @Override
     public void onPathReady(ModelPath path) {
 
-        Log.d("XXX", "on path ready");
         if (isTracking) {
             currentPath = path;
             if (onPathListener != null) {
-                onPathListener.onPathUpdated(currentPath);
+                onPathListener.onCurrentPathUpdated(currentPath);
             }
         }
     }
@@ -166,7 +158,6 @@ public class LocationService extends Service implements LocationPresenterContrac
         currentPath = new ModelPath(calendar.getTime(), calendar.getTime(), new ArrayList<ModelPoint>());
         fusedLocationProviderClient.requestLocationUpdates(request, mLocationCallback, null);
         showNotification();
-        Log.d("XXX", "start journey");
     }
 
     public void stopJourney() {
@@ -175,6 +166,5 @@ public class LocationService extends Service implements LocationPresenterContrac
         stopForeground(true);
         isTracking = false;
         currentPath = null;
-        Log.d("XXX", "stop journey");
     }
 }

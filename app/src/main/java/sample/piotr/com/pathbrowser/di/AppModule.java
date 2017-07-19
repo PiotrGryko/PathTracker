@@ -31,8 +31,6 @@ public class AppModule {
         this.mApplication = mApplication;
     }
 
-
-
     @Provides
     public Handler provideHandler() {
 
@@ -59,7 +57,7 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public PathRepository getPathRepository(Handler handler, MyRoomDatabase myRoomDatabase,  Executor executor) {
+    public PathRepository getPathRepository(Handler handler, MyRoomDatabase myRoomDatabase, Executor executor) {
 
         return new PathRepository(handler, myRoomDatabase, executor);
     }
@@ -76,7 +74,9 @@ public class AppModule {
     public LocationRequest provideLocationRequest() {
 
         LocationRequest request = new LocationRequest();
-        request.setInterval(30000);
+        request.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        request.setFastestInterval(30 * 1000);
+        request.setInterval(60 * 5 * 1000);
         return request;
     }
 }

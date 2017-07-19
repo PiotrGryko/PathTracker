@@ -2,11 +2,9 @@ package sample.piotr.com.pathbrowser.map;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.graphics.Path;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,19 +15,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
 import dagger.android.support.AndroidSupportInjection;
-import sample.piotr.com.pathbrowser.MainActivity;
+import sample.piotr.com.pathbrowser.ActivityInterface;
 import sample.piotr.com.pathbrowser.R;
-import sample.piotr.com.pathbrowser.dao.PathRepository;
-import sample.piotr.com.pathbrowser.list.FragmentList;
 import sample.piotr.com.pathbrowser.model.ModelPath;
 import sample.piotr.com.pathbrowser.model.ModelPoint;
 import sample.piotr.com.pathbrowser.service.LocationService;
@@ -39,6 +32,7 @@ public class FragmentMap extends Fragment implements LocationService.OnPathListe
     private MapView mapView;
     private GoogleMap gMap;
     private ModelPath loadedPath;
+    private ModelPath currentPath;
 
     @Inject
     FusedLocationProviderClient fusedLocationProviderClient;
@@ -115,18 +109,17 @@ public class FragmentMap extends Fragment implements LocationService.OnPathListe
         });
 
         if (this.getArguments() != null) {
-            loadedPath = ModelPath.fromJson(getArguments().getString("path"));
-            loadPath(loadedPath, Color.GREEN);
+
+            loadPathFromList(ModelPath.fromJson(getArguments().getString("path")));
         }
 
-        if (getActivity() instanceof MainActivity) {
-            loadPath(((MainActivity) getActivity()).getCurrentPath(), Color.BLUE);
+        if (getActivity() instanceof ActivityInterface) {
+            drawPath(((ActivityInterface) getActivity()).getCurrentPath(), Color.BLUE);
         }
     }
 
-    private void loadPath(ModelPath path, int color) {
+    private void drawPath(ModelPath path, int color) {
 
-        Log.d("XXX", "load path " + path);
         if (path == null) {
             return;
         }
@@ -143,13 +136,26 @@ public class FragmentMap extends Fragment implements LocationService.OnPathListe
         this.gMap.addPolyline(options);
     }
 
+    public void loadPathFromList(ModelPath path) {
+
+        this.gMap.clear();
+        loadedPath = path;
+        if (loadedPath != null) {
+            drawPath(path, Color.RED);
+        }
+        if (currentPath != null) {
+            drawPath(currentPath, Color.BLUE);
+        }
+    }
+
     @Override
-    public void onPathUpdated(ModelPath path) {
+    public void onCurrentPathUpdated(ModelPath path) {
 
         this.gMap.clear();
         if (loadedPath != null) {
-            loadPath(loadedPath, Color.GREEN);
+            drawPath(loadedPath, Color.RED);
         }
-        loadPath(path, Color.BLUE);
+        currentPath = path;
+        drawPath(currentPath, Color.BLUE);
     }
 }

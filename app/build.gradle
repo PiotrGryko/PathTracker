@@ -1,6 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
     compileSdkVersion 25
     buildToolsVersion "26.0.0"
     defaultConfig {
@@ -35,12 +39,19 @@ dependencies {
     annotationProcessor 'com.google.dagger:dagger-android-processor:2.11-rc2'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.11-rc2'
 
+
+
+
     //room
     compile "android.arch.persistence.room:runtime:1.0.0-alpha1"
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0-alpha1"
 
     compile 'com.android.support:appcompat-v7:25.3.1'
     testCompile 'junit:junit:4.12'
+
+    testCompile "org.mockito:mockito-core:2.8.47"
+
+
 
 
 }
