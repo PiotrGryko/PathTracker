@@ -59,7 +59,6 @@ public class LocationService extends Service implements LocationPresenterContrac
     public class LocalBinder extends Binder {
 
         public LocationService getService() {
-            // Return this instance of LocalService so clients can call public methods
             return LocationService.this;
         }
     }
@@ -129,11 +128,6 @@ public class LocationService extends Service implements LocationPresenterContrac
         }
     }
 
-    @Override
-    public void onPathsFetched(List<ModelPath> paths) {
-
-    }
-
     public void toggleTracking(Context context) {
 
         Intent intent = new Intent(context, LocationService.class);
@@ -147,8 +141,8 @@ public class LocationService extends Service implements LocationPresenterContrac
         }
     }
 
-    public ModelPath getCurrentPath()
-    {
+    public ModelPath getCurrentPath() {
+
         return currentPath;
     }
 

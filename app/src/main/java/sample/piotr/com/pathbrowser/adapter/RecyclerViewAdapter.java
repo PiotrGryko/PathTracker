@@ -1,13 +1,10 @@
 package sample.piotr.com.pathbrowser.adapter;
 
 import android.content.Context;
-import android.support.v4.util.Pair;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -35,7 +32,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public interface OnItemClickListener {
 
-        public void onItemClick(int position, ModelPath item, Pair<View, String>... sharedViews);
+        public void onItemClick(int position, ModelPath item);
     }
 
     public class AdapterViewHolder extends RecyclerView.ViewHolder {
@@ -67,25 +64,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(final AdapterViewHolder viewHolder, final int position) {
+    public void onBindViewHolder(final AdapterViewHolder viewHolder,int position) {
 
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
+                int adapterPosition = viewHolder.getAdapterPosition();
                 if (onItemClickListener != null) {
-                    onItemClickListener.onItemClick(position, data.get(position), new Pair<View, String>(viewHolder.tvStartTime, "test"), new
-                            Pair<View, String>(viewHolder.tvStartTime, "test2"));
+                    onItemClickListener.onItemClick(adapterPosition, data.get(adapterPosition));
                 }
             }
         });
 
         viewHolder.tvStartTime.setText(sdf.format(data.get(position).getStartDate()));
         viewHolder.tvEndTime.setText(sdf.format(data.get(position).getEndDate()));
-        viewHolder.tvPointsCount.setText("points: " + data.get(position).getPoints().size());
+        viewHolder.tvPointsCount.setText(context.getString(R.string.points_prefix,data.size()));
 
-        ViewCompat.setTransitionName(viewHolder.tvStartTime, String.valueOf(position) + "_test2");
     }
 
     @Override

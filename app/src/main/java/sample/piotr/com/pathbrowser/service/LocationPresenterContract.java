@@ -14,10 +14,8 @@ public interface LocationPresenterContract {
 
     interface Presenter{
         public void onLocationFetched(ModelPath path,Location point);
-        public void fetchPaths();
     }
     interface View{
         public void onPathReady(ModelPath path);
-        public void onPathsFetched(List<ModelPath> paths);
     }
 }

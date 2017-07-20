@@ -3,7 +3,6 @@ package sample.piotr.com.pathbrowser.list;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,7 +20,6 @@ import sample.piotr.com.pathbrowser.ActivityInterface;
 import sample.piotr.com.pathbrowser.R;
 import sample.piotr.com.pathbrowser.adapter.RecyclerViewAdapter;
 import sample.piotr.com.pathbrowser.dao.PathRepository;
-import sample.piotr.com.pathbrowser.map.FragmentMap;
 import sample.piotr.com.pathbrowser.model.ModelPath;
 import sample.piotr.com.pathbrowser.service.LocationService;
 
@@ -64,7 +62,7 @@ public class FragmentList extends Fragment implements LocationService.OnPathList
         adapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
 
             @Override
-            public void onItemClick(int position, ModelPath item, Pair<View, String>... sharedViews) {
+            public void onItemClick(int position, ModelPath item) {
 
                 ActivityInterface activity = (ActivityInterface) getActivity();
                 activity.loadMap(item);

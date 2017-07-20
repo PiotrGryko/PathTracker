@@ -24,7 +24,7 @@ import sample.piotr.com.pathbrowser.dao.PathRepository;
 @Module
 public class AppModule {
 
-    Application mApplication;
+    private Application mApplication;
 
     public AppModule(Application mApplication) {
 

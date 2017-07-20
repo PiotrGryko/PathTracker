@@ -37,16 +37,5 @@ public class LocationServicePresenter implements LocationPresenterContract.Prese
         });
     }
 
-    @Override
-    public void fetchPaths() {
 
-        pathRepository.getAllPaths(new PathRepository.OnPathCallback<List<ModelPath>>() {
-
-            @Override
-            public void onResult(List<ModelPath> result) {
-
-                view.onPathsFetched(result);
-            }
-        });
-    }
 }
