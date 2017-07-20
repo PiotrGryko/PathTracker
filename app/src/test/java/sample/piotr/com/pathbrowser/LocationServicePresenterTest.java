@@ -87,7 +87,7 @@ public class LocationServicePresenterTest {
      * Each next invocation should just update object points list
      */
     @Test
-    public void testLoadingPaths() {
+    public void testSavingAndUpdatingPath() {
 
         ModelPath path = new ModelPath(Calendar.getInstance().getTime(), Calendar.getInstance().getTime(), new ArrayList<ModelPoint>());
         for (int i = 0; i < 3; i++) {
